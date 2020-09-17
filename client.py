@@ -3,6 +3,7 @@ import sys
 import asyncio
 import pickle
 import time
+import os
 
 # este programa exemplifica o envio via TCP de dois numeros x, y para o servidor
 # o servidor retorna x*y 
@@ -17,26 +18,32 @@ import time
 async def hello():
     address = sys.argv[1]
     port = int(sys.argv[2])
-    x = sys.argv[3]
-    y = sys.argv[4]
+    #x = sys.argv[3]
+    #y = sys.argv[4]
     uri = "ws://"+address+":"+str(port)
+
     async with websockets.connect(uri) as websocket:
         # vamos serializar os dados a enviar
-        msg = pickle.dumps((x,y))
+        
+        print ("abrindo arquivo...")
+        print(os.path.getsize('projeto_pratico1.pdf'))
+        arq = open('projeto_pratico1.pdf','rb')
+        
+        print ("enviado  arquivo")
+        for i in arq:
 
-        # vamos enviar os dados
-        await websocket.send(msg)
+            # vamos enviar os dados
+            await websocket.send(i)
+            #tam = i
         #print(f"> {msg}")
+        #print(tam)
 
         # vamos receber dados
         # buffer possui tamanho de 1024 bytes
-        data = await websocket.recv()
+        #data = await websocket.recv()
         
-        # vamos desserializar os dados
-        z = pickle.loads(data)
-
         # vamos imprimir o resultado
-        print('%s*%s = %d'%(x,y,z))
+        #print(data)
 
 asyncio.get_event_loop().run_until_complete(hello())
 
