@@ -1,50 +1,57 @@
-import websockets
+import socket
 import sys
-import asyncio
 import pickle
 import time
 import os
+import tqdm
 
-# este programa exemplifica o envio via TCP de dois numeros x, y para o servidor
-# o servidor retorna x*y 
+#arguments
 
+filename = sys.argv[1]
+host = sys.argv[2]
+port = int(sys.argv[3])
+direc = sys.argv[4]
 
-# vamos obter os parametros: endereco, porta, x, y
-#address = sys.argv[1]
-#port = int(sys.argv[2])
-#x = sys.argv[3]
-#y = sys.argv[4]
+SEPARATOR = "<SEPARATOR>"
 
-async def hello():
-    address = sys.argv[1]
-    port = int(sys.argv[2])
-    #x = sys.argv[3]
-    #y = sys.argv[4]
-    uri = "ws://"+address+":"+str(port)
+BUFFER_SIZE = 1024 * 4
 
-    async with websockets.connect(uri) as websocket:
-        # vamos serializar os dados a enviar
-        
-        print ("abrindo arquivo...")
-        print(os.path.getsize('projeto_pratico1.pdf'))
-        arq = open('projeto_pratico1.pdf','rb')
-        
-        print ("enviado  arquivo")
-        for i in arq:
+def request_file(filename, host, port, direc):
+    # create the client socket
+    s = socket.socket()
+    print(f"[+] Connecting to {host}:{port}")
+    s.connect((host, port))
+    print("[+] Connected.")
 
-            # vamos enviar os dados
-            await websocket.send(i)
-            #tam = i
-        #print(f"> {msg}")
-        #print(tam)
+    # send the filename 
+    s.send(f"{filename}".encode())
 
-        # vamos receber dados
-        # buffer possui tamanho de 1024 bytes
-        #data = await websocket.recv()
-        
-        # vamos imprimir o resultado
-        #print(data)
+    received = s.recv(BUFFER_SIZE).decode()
+    aux, filesize = received.split(SEPARATOR)
 
-asyncio.get_event_loop().run_until_complete(hello())
+    if (int(aux)):
+        # convert to integer
+        filesize = int(filesize)
+        # start receiving the file from the socket
+        # and writing to the file stream
+        progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+        with open(direc+"/"+filename, "wb") as f:
+            for _ in progress:
+                # read 1024 bytes from the socket (receive)
+                bytes_read = s.recv(BUFFER_SIZE)
+                if not bytes_read:    
+                    # nothing is received
+                    # file transmitting is done
+                    break
+                # write to the file the bytes we just received
+                f.write(bytes_read)
+                # update the progress bar
+                progress.update(len(bytes_read))
+    else:
+        print(f"[+] File {filename} does not exist in the server")
+    
+     # close the socket
+    s.close()
 
-
+   
+request_file(filename, host, port, direc)
