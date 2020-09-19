@@ -5,11 +5,12 @@ import time
 import os
 import tqdm
 
-#arguments
+# arguments
 
-filename = sys.argv[1]
-host = sys.argv[2]
-port = int(sys.argv[3])
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+filename = sys.argv[3]
 direc = sys.argv[4]
 
 SEPARATOR = "<SEPARATOR>"
@@ -47,11 +48,33 @@ def request_file(filename, host, port, direc):
                 f.write(bytes_read)
                 # update the progress bar
                 progress.update(len(bytes_read))
+        print(f"[+] File {filename} saved")
     else:
         print(f"[+] File {filename} does not exist in the server")
     
      # close the socket
     s.close()
 
-   
-request_file(filename, host, port, direc)
+def request_list(host, port):
+    # create the client socket
+    s = socket.socket()
+    print(f"[+] Connecting to {host}:{port}")
+    s.connect((host, port))
+    print("[+] Connected.")
+
+    aux = "cache_list"
+    # request list 
+    s.send(f"{aux}".encode())
+
+    received = s.recv(BUFFER_SIZE)
+    received = pickle.loads(received)
+    
+    if not received:
+        print("[+] There are no cached files ")
+    else:
+        print(f"[+] Cached files: {received} ")
+
+if(filename == "list"):
+    request_list(host, port)
+else:
+    request_file(filename, host, port, direc)
