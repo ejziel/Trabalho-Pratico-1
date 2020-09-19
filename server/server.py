@@ -5,6 +5,7 @@ import pickle
 import time
 import tqdm
 import os
+from io import BytesIO
 
 class LRUCache:
 
@@ -82,21 +83,56 @@ while True:
 
     if(cache.isIn(requested_filename)):
         print(f"[+] Cache hit. File {requested_filename} sent to the client.")
-        print(cache.get(requested_filename))
+        #print(cache.get(requested_filename))
+
+        filesize = cache.get(requested_filename)[0]
+
+        # send the bool and filesize
+        client_socket.send(f"{1}{SEPARATOR}{filesize}".encode())
+
+        # start sending the file
+        progress = tqdm.tqdm(range(filesize), f"Sending {requested_filename}", unit="B", unit_scale=True, unit_divisor=1024)
+
+        temp_file = cache.get(requested_filename)
+        temp_file = pickle.loads(temp_file[1])
+        
+        with BytesIO(temp_file) as f:
+            for _ in progress:
+                # read the bytes from the file
+                bytes_read = f.read(BUFFER_SIZE)
+                if not bytes_read:
+                    # file transmitting is done
+                    break
+                # we use sendall to assure transimission in 
+                # busy networks
+                client_socket.sendall(bytes_read)
+                # update the progress bar
+                progress.update(len(bytes_read))
+
     else:
         if(os.path.isfile(direc+"/"+requested_filename)):
             filesize = int(os.path.getsize(direc+"/"+requested_filename))
+
+            print(f"[+] Cache missed. File {requested_filename} sent to the client.")
             
             #putting file in the cache memory
-            arq = open(direc+"/"+requested_filename, "rb")
-            cache.put(requested_filename, filesize, arq)
+            with open(direc+"/"+requested_filename, "rb") as arq:
+                data = arq.read()
+                data = pickle.dumps(data)
+                cache.put(requested_filename, filesize, data)
 
             # send the bool and filesize
             client_socket.send(f"{1}{SEPARATOR}{filesize}".encode())
 
             # start sending the file
             progress = tqdm.tqdm(range(filesize), f"Sending {requested_filename}", unit="B", unit_scale=True, unit_divisor=1024)
-            with open(direc+"/"+requested_filename, "rb") as f:
+            #with open(direc+"/"+requested_filename, "rb") as f:
+
+            temp_file = cache.get(requested_filename)
+            temp_file = pickle.loads(temp_file[1])
+      
+
+            with BytesIO(temp_file) as f:
                 for _ in progress:
                     # read the bytes from the file
                     bytes_read = f.read(BUFFER_SIZE)
