@@ -7,9 +7,6 @@ import tqdm
 import os
 from io import BytesIO
 import threading
-import logging
-MAX_SIZE = 64*1048576
-
 
 class LRUCache:
 
@@ -25,7 +22,7 @@ class LRUCache:
         else:
             return False
 
-    # getting tuple with the size and value
+    # getting tuple with size and value
     def get(self, key):
         if key not in self.cache:
             return -1
@@ -33,7 +30,7 @@ class LRUCache:
             self.cache.move_to_end(key)
             return self.cache[key]
 
-    # put size and value of the file in the cache
+    # put size and value of file in the cache
     def put(self, key, size, value) -> None:
         if(size > self.max_capacity):
             return -1
@@ -46,7 +43,7 @@ class LRUCache:
                 self.cache.move_to_end(key)
                 self.used_capacity += size
 
-    # return a list with cached keys
+    # return a list with cached files
     def cacheList(self):
         key_list = []
         for key in self.cache:
@@ -160,7 +157,6 @@ def send_file(client_socket, address, requested_filename):
     # close the client socket
     client_socket.close()
     
-
 def send_list(client_socket, address):
     print(f"[+] Client {address} is requesting the cached files.\n")
     #locking
@@ -173,17 +169,14 @@ def send_list(client_socket, address):
     #release
     lock.release()
     
-
-
 # arguments
 port = int(sys.argv[1])
 direc = sys.argv[2]
 
 # device's IP address
 host = "localhost"
-
-# receive 4096 bytes each time
 BUFFER_SIZE = 1024
+MAX_SIZE = 64*1048576
 SEPARATOR = "<SEPARATOR>"
 
 # create the server socket
@@ -196,25 +189,23 @@ s.listen(5)
 print(f"[*] Listening as {host}:{port}")
 
 # create cache
-cache = LRUCache(MAX_SIZE) #VERIFICAR CACHE
+cache = LRUCache(MAX_SIZE) 
 
 # create locker
 lock = threading.Lock()
 
 # main loop
 while True:
-
-    #print(f"[*] Waiting connection.\n")
+    
     client_socket, address = s.accept()
-
     requested_item = client_socket.recv(BUFFER_SIZE).decode()
 
     if (requested_item == "cache_list"):  
-        # creating thread
+        # creating thread to request list
         x = threading.Thread(target=send_list, args=(client_socket, address))
         x.start()
     else:
-        # creating thread
+        # creating thread to request file
         x = threading.Thread(target=send_file, args=(client_socket, address, requested_item))
         x.start()
 

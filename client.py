@@ -6,18 +6,12 @@ import os
 import tqdm
 
 # arguments
-
-
 host = sys.argv[1]
 port = int(sys.argv[2])
 filename = sys.argv[3]
 direc = sys.argv[4]
 
 SEPARATOR = "<SEPARATOR>"
-
-# receive 4096 bytes each time
-#BUFFER_SIZE = 4096
-
 BUFFER_SIZE = 1024
 
 def request_file(filename, host, port, direc):
@@ -55,7 +49,7 @@ def request_file(filename, host, port, direc):
     else:
         print(f"[+] File {filename} does not exist in the server")
     
-     # close the socket
+    # close socket
     s.close()
 
 def request_list(host, port):
