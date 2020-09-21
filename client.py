@@ -15,7 +15,10 @@ direc = sys.argv[4]
 
 SEPARATOR = "<SEPARATOR>"
 
-BUFFER_SIZE = 1024 * 4
+# receive 4096 bytes each time
+#BUFFER_SIZE = 4096
+
+BUFFER_SIZE = 1024
 
 def request_file(filename, host, port, direc):
     # create the client socket
@@ -68,7 +71,7 @@ def request_list(host, port):
 
     received = s.recv(BUFFER_SIZE)
     received = pickle.loads(received)
-    
+
     if not received:
         print("[+] There are no cached files ")
     else:
