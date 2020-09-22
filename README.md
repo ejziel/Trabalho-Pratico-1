@@ -29,7 +29,7 @@ The client should be able to initiate a connection to the server, via a socket a
 ```
 % python client.py server_host server_port file_name directory
 e.g.
-% python client.py localhost 9089 projeto.pdf .
+% python client.py localhost 9089 projeto.pdf /home/ejziel/projeto1/client
 ```
 <p>(a) server_host: The IP address or name of the server, e.g., 127.0.0.1 or localhost for the server running on the local machine. <br>
 (b) server_port: The port on which the server is listening to connections from clients. <br>
