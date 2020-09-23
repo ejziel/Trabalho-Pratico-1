@@ -16,15 +16,17 @@ The server execution cycle after receiving a request is described as follows: <b
 1. If the server receives a message with the key "cache_list" from the client, it will return a list of the cached files. 
 2. When the client requests a file from the server, it prints "Client {address} is requesting file {requested_filename}.", and starts searching for the requested file in the cache memory.
 
-     2.1 If the file is cached, the server sends the file to the client and prints the message "Cache hit. File {requested_filename} sent to the client." 
+     - If the file is cached, the server sends the file to the client and prints the message "Cache hit. File {requested_filename} sent to the client." 
 
-     2.2 If the file is not in cache, the server will check if it is in the directory.
+     - If the file is not in cache, the server will check if it is in the directory.
 
-         2.2.1 If the file size is larger than 64 MB, the file is sent to the client and prints the message "Cache missed. File {requested_filename} sent to the client."
-         2.2.2 If the file size is less than or equal to 64 MB, the file is cached and then sent to the client. The caching process uses the LRU (Least recently used) cache replacement policy, and works as follows:
-             (a) if used cache storage + file size <= 64MB: Caches the file, sends it to the client and prints the message "Cache missed. File {requested_filename} sent to the client."
-             (b) if used cache storage + file size > 64MB: Remove the least recently requested file and perform step (a) again until the condition is satisfied.
-     2.3 If the file does not exist in the server's directory, print the message "File {requested_filename} does not exist."
+         - If the file size is larger than 64 MB, the file is sent to the client and prints the message "Cache missed. File {requested_filename} sent to the client."
+         - If the file size is less than or equal to 64 MB, the file is cached and then sent to the client. The caching process uses the LRU (Least recently used) cache replacement policy, and works as follows:
+
+             (a) **if used cache storage + file size <= 64MB**: Caches the file, sends it to the client and prints the message "Cache missed. File {requested_filename} sent to the client."
+             
+             (b) **if used cache storage + file size > 64MB**: Remove the least recently requested file and perform step (a) again until the condition is satisfied.
+     - If the file does not exist in the server's directory, print the message "File {requested_filename} does not exist."
 
 In all cases of access to cache memory, the multithreaded locking process is carried out to ensure mutual exclusion.
 
@@ -52,7 +54,7 @@ e.g.
 (c) file_name: The name of the requested file. <br>
 (d) directory: The directory to save the requested files. <br>
 
-• To request a list of cached files, the reserved word "list" is used as an argument instead of the file name, with the following syntax: <br>
+• To request a list of cached files, the reserved word "***list***" is used as an argument instead of the file name, with the following syntax: <br>
 
 ```
 e.g.
