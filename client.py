@@ -9,7 +9,7 @@ import tqdm
 host = sys.argv[1]
 port = int(sys.argv[2])
 filename = sys.argv[3]
-direc = sys.argv[4]
+
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024
@@ -74,4 +74,5 @@ def request_list(host, port):
 if(filename == "list"):
     request_list(host, port)
 else:
+    direc = sys.argv[4]
     request_file(filename, host, port, direc)

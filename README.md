@@ -58,5 +58,5 @@ e.g.
 
 ```
 e.g.
-% python client.py localhost 9089 list /home/ejziel/projeto1/client
+% python client.py localhost 9089 list
 ```
